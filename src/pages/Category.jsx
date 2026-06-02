@@ -4,14 +4,15 @@ import useGlobalReducer from "../hooks/useGlobalReducer.jsx";
 
 const Item = ({ item }) => {
     const { dispatch } = useGlobalReducer()
+    const displayNombre = item.name || item.title || item.properties?.title
     return (
         <li key={item.uid} className="list-group-item d-flex align-items-center gap-3 justify-content-between">
             <div className="d-flex align-items-center gap-3">
-                {item.name}
+                {displayNombre}
                 <span className="badge bg-primary rounded-pill">ID: {item.uid}</span>
             </div>
             <i className="fa-solid fa-heart text-danger fs-5" role="button"
-                onClick={() => dispatch({ type: 'ADD_FAVORITE', payload: item })}
+                onClick={() => dispatch({ type: 'ADD_FAVORITE', payload: { uid: item.uid, name: displayNombre } })}
             />
         </li>
     );
@@ -42,7 +43,10 @@ export const Category = () => {
                 if (!response.ok) { throw new Error(`HTTP error! status: ${response.status}`) }
                 const data = await response.json()
 
-                setData(data.results || [])
+                const listaObtenida = data.results || data.result || []
+
+                setData(Array.isArray(listaObtenida) ? listaObtenida : [listaObtenida])
+
                 setNextPage(prev => ({
                     ...prev,
                     next: data.next || null,
@@ -68,24 +72,26 @@ export const Category = () => {
                     ))
                 )}
             </ul>
-            <div className="d-flex justify-content-between">
-                <button className="btn btn-secondary mt-3" 
-                disabled={!nextPage.previous}
-                onClick={() => setNextPage(prev => ({ ...prev, page: prev.page - 1 }))} 
-                >
-                    Previous
-                </button>
 
-                <span className="text-muted mt-3 fw-bold">Página {nextPage.page}</span>
+            {type !== "films" && (
+                <div className="d-flex justify-content-between align-items-center mb-5">
+                    <button className="btn btn-secondary mt-3"
+                        disabled={!nextPage.previous}
+                        onClick={() => setNextPage(prev => ({ ...prev, page: prev.page - 1 }))}
+                    >
+                        Previous
+                    </button>
 
-                <button className="btn btn-secondary mt-3" 
-                disabled={!nextPage.next} 
-                onClick={() => setNextPage(prev => ({ ...prev, page: prev.page + 1 }))}
-                >
-                    Next
-                </button>
+                    <span className="text-muted mt-3 fw-bold">Página {nextPage.page}</span>
 
-            </div>
+                    <button className="btn btn-secondary mt-3"
+                        disabled={!nextPage.next}
+                        onClick={() => setNextPage(prev => ({ ...prev, page: prev.page + 1 }))}
+                    >
+                        Next
+                    </button>
+                </div>
+            )}
         </div>
 
     )
