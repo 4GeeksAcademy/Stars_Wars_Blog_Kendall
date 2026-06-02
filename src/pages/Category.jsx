@@ -1,0 +1,79 @@
+import { useParams } from "react-router-dom";
+import { useEffect, useState } from "react";
+import useGlobalReducer from "../hooks/useGlobalReducer.jsx";
+
+const Item = ({ item }) => {
+    const { dispatch } = useGlobalReducer()
+    return (
+        <li key={item.uid} className="list-group-item d-flex align-items-center gap`-3 justify-content-between">
+            <div className="d-flex align-items-center gap-3">
+                {item.name}
+                <span className="badge bg-primary rounded-pill">ID: {item.uid}</span>
+            </div>
+            <i className="fa-solid fa-heart text-danger fs-5" role="button"
+                onClick={() => dispatch({ type: 'ADD_FAVORITE', payload: item })}
+            />
+        </li>
+    );
+};
+
+export const Category = () => {
+    const { store, dispatch } = useGlobalReducer()
+    const { type } = useParams();
+    const [data, setData] = useState([]);
+    const [nextPage, setNextPage] = useState({
+        next: null,
+        previous: null
+    });
+    const url = `https://www.swapi.tech/api/${type}`;
+
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const response = await fetch(url)
+                if (!response.ok) { throw new Error(`HTTP error! status: ${response.status}`) }
+                const data = await response.json()
+
+                setData(data.results || [])
+                setNextPage({
+                    next: data.next,
+                    previous: data.previous
+                })
+                console.log(data.results)
+            } catch (error) {
+                console.error("Error fetching data:", error);
+            }
+        }
+        fetchData();
+    }, [type])
+
+    return (
+        <div className="container mt-5">
+            <h1 className="text-center mb-4">{type.toUpperCase()}</h1>
+            <ul className="list-group">
+                {data.length === 0 ? (
+                    <div className="text-muted text-center">Cargando o no hay datos disponibles...</div>
+                ) : (
+                    data.map((item) => (
+                        <Item key={item.uid} item={item} />
+                    ))
+                )}
+            </ul>
+            <div className="d-flex justify-content-between">
+                <button className="btn btn-secondary mt-3" 
+                disabled={!nextPage.previous} 
+                >
+                    Previous
+                </button>
+
+                <button className="btn btn-secondary mt-3" 
+                disabled={!nextPage.next} 
+                >
+                    Next
+                </button>
+
+            </div>
+        </div>
+
+    )
+}
