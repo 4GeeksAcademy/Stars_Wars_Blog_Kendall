@@ -17,10 +17,13 @@ export const Navbar = () => {
 					</button>
 					<ul className="dropdown-menu">
 						{store.favorites.map((favorite) => (
-							<li key={favorite.uid}>
+							<li key={favorite.uid} className="d-flex align-items-center justify-content-between px-3 py-1">
 								<Link className="dropdown-item" to={`/description/${favorite.uid}`}>
 									{favorite.name}
 								</Link>
+								<button className="btn btn-link text-danger p-0" onClick={() => dispatch({ type: 'DELETE_FAVORITE', payload: favorite.uid })}>
+									<i className="fa-solid fa-trash"></i>
+								</button>
 							</li>
 						))}
 					</ul>

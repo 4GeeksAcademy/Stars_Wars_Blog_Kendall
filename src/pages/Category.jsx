@@ -5,7 +5,7 @@ import useGlobalReducer from "../hooks/useGlobalReducer.jsx";
 const Item = ({ item }) => {
     const { dispatch } = useGlobalReducer()
     return (
-        <li key={item.uid} className="list-group-item d-flex align-items-center gap`-3 justify-content-between">
+        <li key={item.uid} className="list-group-item d-flex align-items-center gap-3 justify-content-between">
             <div className="d-flex align-items-center gap-3">
                 {item.name}
                 <span className="badge bg-primary rounded-pill">ID: {item.uid}</span>
@@ -23,29 +23,38 @@ export const Category = () => {
     const [data, setData] = useState([]);
     const [nextPage, setNextPage] = useState({
         next: null,
-        previous: null
+        previous: null,
+        page: 1
     });
-    const url = `https://www.swapi.tech/api/${type}`;
+
+    useEffect(() => {
+        setNextPage({
+            next: null,
+            previous: null,
+            page: 1
+        })
+    }, [type]);
 
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const response = await fetch(url)
+                const response = await fetch(`https://www.swapi.tech/api/${type}?page=${nextPage.page}&limit=10`)
                 if (!response.ok) { throw new Error(`HTTP error! status: ${response.status}`) }
                 const data = await response.json()
 
                 setData(data.results || [])
-                setNextPage({
-                    next: data.next,
-                    previous: data.previous
-                })
+                setNextPage(prev => ({
+                    ...prev,
+                    next: data.next || null,
+                    previous: data.previous || null
+                }))
                 console.log(data.results)
             } catch (error) {
                 console.error("Error fetching data:", error);
             }
         }
         fetchData();
-    }, [type])
+    }, [type, nextPage.page]);
 
     return (
         <div className="container mt-5">
@@ -61,13 +70,17 @@ export const Category = () => {
             </ul>
             <div className="d-flex justify-content-between">
                 <button className="btn btn-secondary mt-3" 
-                disabled={!nextPage.previous} 
+                disabled={!nextPage.previous}
+                onClick={() => setNextPage(prev => ({ ...prev, page: prev.page - 1 }))} 
                 >
                     Previous
                 </button>
 
+                <span className="text-muted mt-3 fw-bold">Página {nextPage.page}</span>
+
                 <button className="btn btn-secondary mt-3" 
                 disabled={!nextPage.next} 
+                onClick={() => setNextPage(prev => ({ ...prev, page: prev.page + 1 }))}
                 >
                     Next
                 </button>
