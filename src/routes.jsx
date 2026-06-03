@@ -21,8 +21,8 @@ export const router = createBrowserRouter(
 
         <Route path= "/" element={<Home />} />
         <Route path= "/category/:type" element={<Category />} /> 
-        <Route path="/description/:id" element={<Description/>}/>
-        
+        <Route path="/description/:type/:id" element={<Description />} />
+        <Route path="*" element={<h1>Not found!</h1>} />
       </Route>
     )
 );

@@ -1,18 +1,20 @@
-import { useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 import useGlobalReducer from "../hooks/useGlobalReducer.jsx";
 
-const Item = ({ item }) => {
+const Item = ({ type, item }) => {
     const { dispatch } = useGlobalReducer()
     const displayNombre = item.name || item.title || item.properties?.title
     return (
         <li key={item.uid} className="list-group-item d-flex align-items-center gap-3 justify-content-between">
             <div className="d-flex align-items-center gap-3">
+                <Link to={`/description/${type}/${item.uid}`} className="text-decoration-none text-dark">
                 {displayNombre}
+                </Link>
                 <span className="badge bg-primary rounded-pill">ID: {item.uid}</span>
             </div>
             <i className="fa-solid fa-heart text-danger fs-5" role="button"
-                onClick={() => dispatch({ type: 'ADD_FAVORITE', payload: { uid: item.uid, name: displayNombre } })}
+                onClick={() => dispatch({ type: 'ADD_FAVORITE', payload: { uid: item.uid, name: displayNombre, type: type} })}
             />
         </li>
     );
@@ -52,7 +54,7 @@ export const Category = () => {
                     next: data.next || null,
                     previous: data.previous || null
                 }))
-                console.log(data.results)
+                console.log(data.results || data.result)
             } catch (error) {
                 console.error("Error fetching data:", error);
             }
@@ -68,7 +70,9 @@ export const Category = () => {
                     <div className="text-muted text-center">Cargando o no hay datos disponibles...</div>
                 ) : (
                     data.map((item) => (
-                        <Item key={item.uid} item={item} />
+                        
+                            <Item key={item.uid} type={type} item={item} />
+                        
                     ))
                 )}
             </ul>

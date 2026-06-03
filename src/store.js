@@ -9,18 +9,20 @@ export default function storeReducer(store, action = {}) {
   switch(type){
     case 'ADD_FAVORITE':
       return{
-        ...store, 
-        favorites: store.favorites.some((item) => item.uid === payload.uid)
-        ? store.favorites
-        : [...store.favorites, payload]
+        ...store,
+        favorites: store.favorites.some((item) => item.uid === payload.uid && item.type === payload.type)
+          ? store.favorites
+          : [...store.favorites, payload]
       }
     ;
 
 
     case 'DELETE_FAVORITE':
       return {
-        ...store, 
-        favorites: store.favorites.filter((item)=> item.uid !== payload)
+        ...store,
+        favorites: store.favorites.filter(
+          (item) => item.uid !== payload.uid || item.type !== payload.type
+        )
       };
     default:
       return store;
