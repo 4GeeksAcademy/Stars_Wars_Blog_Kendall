@@ -1,5 +1,5 @@
 // Import necessary hooks and functions from React.
-import { useContext, useReducer, createContext } from "react";
+import { useContext, useReducer, createContext, useEffect } from "react";
 import storeReducer, { initialStore } from "../store"  
 
 
@@ -9,6 +9,7 @@ const StoreContext = createContext()
 export function StoreProvider({ children }) {
     
     const [store, dispatch] = useReducer(storeReducer, initialStore())
+
     
     return <StoreContext.Provider value={{ store, dispatch }}>
         {children}
