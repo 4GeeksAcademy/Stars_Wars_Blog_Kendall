@@ -51,13 +51,36 @@ export const Home = () => {
 
     useEffect(() => {
         const fetchData = async () => {
+
+            const cache = localStorage.getItem("swapi_cache")
+
+            if (cache) {
+            const parsedCache = JSON.parse(cache);
+            
+            
+            if (parsedCache.people?.length > 0 || parsedCache.planets?.length > 0 || parsedCache.vehicles?.length > 0) {
+                setData(parsedCache);
+                return; 
+            } else {
+                
+                localStorage.removeItem("swapi_cache");
+            }
+        }
+
+            let stateCache = { 
+                people: [], 
+                planets: [], 
+                vehicles: [] 
+
+            }
+
             for (const type of types) {
                 try {
                     const response = await fetch(url + type)
                     if (!response.ok) { throw new Error(`HTTP error! status: ${response.status}`) }
                     const { results } = await response.json()
 
-                    const promesas = results.map(item =>
+                    const promise = results.map(item =>
                         fetch(`${url}${type}/${item.uid}`)
                             .then(res => {
                                 if (!res.ok) throw new Error();
@@ -67,8 +90,10 @@ export const Home = () => {
                             .catch(() => null)
                     )
 
-                    const resultadosDetalles = await Promise.all(promesas);
+                    const resultadosDetalles = await Promise.all(promise);
                     const listData = resultadosDetalles.filter(item => item !== null);
+
+                    stateCache[type] = listData
 
                     setData(prevData => ({
                         ...prevData,
@@ -79,6 +104,7 @@ export const Home = () => {
                     console.error("Error fetching data:", error);
                 }
             }
+            localStorage.setItem("swapi_cache", JSON.stringify(stateCache))
         }
         fetchData()
     }, [])
@@ -86,11 +112,10 @@ export const Home = () => {
     return (
         <div className="container d-flex justify-content-center flex-column py-4">
             {types.map((type) => (
-                // Agregamos la propiedad 'key' obligatoria de React
+                
                 <div key={type} className="mb-5">
                     <h1 className="text-capitalize mb-3">{type}</h1>
 
-                    {/* Pasamos los datos exactos de esa categoría usando data[type] */}
                     <CardData items={data[type]} />
                 </div>
             ))}
