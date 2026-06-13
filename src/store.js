@@ -1,30 +1,25 @@
-export const initialStore=()=>{
-  return{
+export const initialState = {
     favorites: []
-  }
-}
+};
 
-export default function storeReducer(store, action = {}) {
-   const {type, payload} = action
-  switch(type){
-    case 'ADD_FAVORITE':
-      return{
-        ...store,
-        favorites: store.favorites.some((item) => item.uid === payload.uid && item.type === payload.type)
-          ? store.favorites
-          : [...store.favorites, payload]
-      }
-    ;
+export const globalReducer = (state, action) => {
+    switch (action.type) {
+        case 'ADD_FAVORITE':
+            if (state.favorites.some(fav => fav.uid === action.payload.uid)) {
+                return state; 
+            }
+            return {
+                ...state,
+                favorites: [...state.favorites, action.payload]
+            };
 
+        case 'REMOVE_FAVORITE':
+            return {
+                ...state,
+                favorites: state.favorites.filter(fav => fav.uid !== action.payload.uid)
+            };
 
-    case 'DELETE_FAVORITE':
-      return {
-        ...store,
-        favorites: store.favorites.filter(
-          (item) => item.uid !== payload.uid || item.type !== payload.type
-        )
-      };
-    default:
-      return store;
-  }    
-}
+        default:
+            return state;
+    }
+};
